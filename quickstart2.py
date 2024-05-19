@@ -90,49 +90,50 @@ SAMPLE_RANGE_NAME = 'Test List!A2:E246'
 
 
 
-class GoogleSheet:
-  SPREADSHEET_ID = '1elrwsch2m95ygc0izoJUcjtRpedGmO2yMed_mmEAuTQ'
-  SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-  service = None
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+service = None
+SPREADSHEET_ID = '1elrwsch2m95ygc0izoJUcjtRpedGmO2yMed_mmEAuTQ'
 
-  def __init__(self):
-    creds = None
 
-    if not creds or not creds.valid:
-      if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-      else:
-        print('flow')
-        flow = InstalledAppFlow.from_client_secrets_file(
-          'credentials.json', self.SCOPES)
-        creds = flow.run_local_server(port=0)
-      with open('token.pickle', 'wb') as token:
-        pickle.dump(creds, token)
+def updateRangeValues(range, values):
+  # SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+  # service = None
+  creds = None
 
-    self.service = build('sheets', 'v4', credentials=creds)
+  if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+      creds.refresh(Request())
+    else:
+      print('flow')
+      flow = InstalledAppFlow.from_client_secrets_file(
+        'credentials.json', SCOPES)
+      creds = flow.run_local_server(port=0)
+    with open('token.pickle', 'wb') as token:
+      pickle.dump(creds, token)
 
-  def updateRangeValues(self, range, values):
-    data = [{
-      'range': range,
-      'values': values
-    }]
-    body = {
-      'valueInputOption': 'USER_ENTERED',
-      'data': data
-    }
-    result = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.SPREADSHEET_ID, body=body).execute()
-    print('{0} cells updated.'.format(result.get('totalUpdatedCells')))
+  service = build('sheets', 'v4', credentials=creds)
+  # service = None
+  # SPREADSHEET_ID = '1elrwsch2m95ygc0izoJUcjtRpedGmO2yMed_mmEAuTQ'
+  data = [{
+    'range': range,
+    'values': values
+  }]
+  body = {
+    'valueInputOption': 'USER_ENTERED',
+    'data': data
+  }
+  result = service.spreadsheets().values().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=body).execute()
+  print('{0} cells updated.'.format(result.get('totalUpdatedCells')))
 
 
 def main():
-  gs = GoogleSheet()
   test_range = 'General!G2:H4'
   test_values = [
     [16, 26],
     [36, 46],
     [56, 66]
   ]
-  gs.updateRangeValues(test_range, test_values)
+  updateRangeValues(test_range, test_values)
 
 
 if __name__ == '__main__':
